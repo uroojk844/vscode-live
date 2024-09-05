@@ -1,5 +1,9 @@
 import { computed, ref } from "vue";
 import { Languages } from "./types";
+import { v4 as uuidv4 } from "uuid";
+import { useLocalStorage } from "@vueuse/core";
+
+export const uid = useLocalStorage("uuid", uuidv4());
 
 let editorId = 1;
 
@@ -49,7 +53,7 @@ export function getFileType(filename: string) {
 }
 
 window.onload = async () => {
-  let res = await fetch(URL + "files/");
+  let res = await fetch(URL + "files/?uid=" + uid.value);
   let files = await res.json();
   if (!files?.success) return;
 
@@ -65,7 +69,7 @@ window.onload = async () => {
 };
 
 export async function createFile(filename: string) {
-  let res = await fetch(URL + "/create/?filename=" + filename);
+  let res = await fetch(`${URL}/create/?uid=${uid.value}&filename=${filename}`);
   let file = await res.json();
   if (!file?.success) return;
   tabs.value.push({
@@ -77,7 +81,7 @@ export async function createFile(filename: string) {
 }
 
 export async function deleteFile(filename: string) {
-  fetch(URL + "/delete/?filename=" + filename)
+  fetch(`${URL}/delete/?uid=${uid.value}&filename=${filename}`)
     .then((res) => res.json())
     .then(() => {
       tabs.value = tabs.value.filter((f) => f.filename != filename);

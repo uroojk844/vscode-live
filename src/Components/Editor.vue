@@ -15,7 +15,7 @@ import { onMounted, ref } from 'vue';
 import "../config";
 import { Languages } from '../types';
 import { createEditor } from '../config';
-import { currentFile, getFileType, path, refreshFrame } from '../functions';
+import { currentFile, getFileType, path, refreshFrame, uid } from '../functions';
 import { useDebounceFn } from '@vueuse/core';
 import { editor } from 'monaco-editor';
 
@@ -33,10 +33,12 @@ const debouncedFn = useDebounceFn(() => {
     abortController.value?.abort();
     abortController.value = new AbortController();
 
-    fetch(URL + 'write/', {
+
+    fetch(`${URL}write/`, {
         signal: abortController.value.signal,
         method: "post",
         body: JSON.stringify({
+            "uid": uid.value,
             "filename": currentFile.value,
             "text": codeEditor.getValue(),
         }),
@@ -44,6 +46,7 @@ const debouncedFn = useDebounceFn(() => {
             "Content-type": "application/json"
         }
     }).then(() => {
+        console.log('writing');
         refreshFrame();
     })
 }, 500)
@@ -52,13 +55,13 @@ onMounted(async () => {
     codeEditor = createEditor(document.getElementById('editor' + props.id) as HTMLElement, props.lang);
 
     // fetching file content from server on page load
-    let file = await fetch(URL + 'read/?filename=' + props.file)
+    let file = await fetch(`${URL}read/?uid=${uid.value}&filename=${props.file}`)
     let text = await file.json();
     codeEditor.setValue(text.success);
 
     codeEditor.onDidFocusEditorText(() => {
         if (getFileType(currentFile.value) == 'html') {
-            path.value = URL + 'code/' + currentFile.value;
+            path.value = `${URL}code/${uid.value}/${currentFile.value}`;
         }
         refreshFrame();
     })
