@@ -51,6 +51,8 @@ export function getFileType(filename: string) {
 window.onload = async () => {
   let res = await fetch(URL + "files/");
   let files = await res.json();
+  console.log(files);
+  
   if (!files?.success) return;
 
   files.success.forEach((file: string, index: number) => {
