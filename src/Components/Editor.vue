@@ -45,10 +45,7 @@ const debouncedFn = useDebounceFn(() => {
         headers: {
             "Content-type": "application/json"
         }
-    }).then(() => {
-        console.log('writing');
-        refreshFrame();
-    })
+    }).then(refreshFrame)
 }, 500)
 
 onMounted(async () => {
