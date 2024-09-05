@@ -11,11 +11,13 @@ div {
 </style>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import "../config";
 import { Languages } from '../types';
 import { createEditor } from '../config';
 import { currentFile, getFileType, path, refreshFrame } from '../functions';
+import { useDebounceFn } from '@vueuse/core';
+import { editor } from 'monaco-editor';
 
 const props = withDefaults(defineProps<{ id: number, file: string, isActive: boolean, lang: Languages }>(), {
     isActive: false,
@@ -23,34 +25,46 @@ const props = withDefaults(defineProps<{ id: number, file: string, isActive: boo
 
 const URL = import.meta.env.VITE_API_URL;
 
+let codeEditor: editor.IStandaloneCodeEditor;
+
+let abortController = ref<AbortController | null>(null);
+
+const debouncedFn = useDebounceFn(() => {
+    abortController.value?.abort();
+    abortController.value = new AbortController();
+
+    fetch(URL + 'write/', {
+        signal: abortController.value.signal,
+        method: "post",
+        body: JSON.stringify({
+            "filename": currentFile.value,
+            "text": codeEditor.getValue(),
+        }),
+        headers: {
+            "Content-type": "application/json"
+        }
+    }).then(() => {
+        refreshFrame();
+    })
+}, 500)
+
 onMounted(async () => {
-    let editor = createEditor(document.getElementById('editor' + props.id) as HTMLElement, props.lang);
+    codeEditor = createEditor(document.getElementById('editor' + props.id) as HTMLElement, props.lang);
 
     // fetching file content from server on page load
     let file = await fetch(URL + 'read/?filename=' + props.file)
     let text = await file.json();
-    editor.setValue(text.success);
+    codeEditor.setValue(text.success);
 
-    editor.onDidFocusEditorText(() => {
+    codeEditor.onDidFocusEditorText(() => {
         if (getFileType(currentFile.value) == 'html') {
             path.value = URL + 'code/' + currentFile.value;
         }
         refreshFrame();
     })
 
-    editor.onDidChangeModelContent(() => {
-        fetch(URL + 'write/', {
-            method: "post",
-            body: JSON.stringify({
-                "filename": currentFile.value,
-                "text": editor.getValue(),
-            }),
-            headers: {
-                "Content-type": "application/json"
-            }
-        })
-
-        refreshFrame();
+    codeEditor.onDidChangeModelContent(() => {
+        debouncedFn();
     });
 });
 </script>
