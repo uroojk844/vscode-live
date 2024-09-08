@@ -4,6 +4,9 @@ import HTMLWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
 import CSSWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
 import JSONWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
 import TSWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
+import { htmlSuggestions } from "./suggestions/HTML";
+import { CSSSuggestions } from "./suggestions/css";
+import { JSSuggestions } from "./suggestions/JS";
 
 self.MonacoEnvironment = {
   getWorker: function (_, label) {
@@ -26,58 +29,28 @@ self.MonacoEnvironment = {
 };
 
 export function createEditor(element: HTMLElement, lang: string) {
-  let codeEditor = editor.create(element);
+  let codeEditor = editor.create(element, {
+    automaticLayout: true,
+    "semanticHighlighting.enabled": true,
+    copyWithSyntaxHighlighting: true,
+    fontLigatures: true,
+    fontFamily: "cascadia code",
+    fontSize: 16,
+    suggestOnTriggerCharacters: true,
+  });
   editor.setTheme("vs-dark");
   editor.setModelLanguage(codeEditor.getModel()!, lang);
   return codeEditor;
 }
 
-languages.registerCompletionItemProvider("html", {
-  provideCompletionItems: (): any => {
-    return {
-      suggestions: [
-        {
-          label: "html",
-          kind: 27,
-          documentation: "Generate HTML Template",
-          insertText: `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
-    
-  </body>
-</html>`,
-        },
-      ],
-    };
-  },
-});
-
-languages.registerCompletionItemProvider("css", {
-  provideCompletionItems: (): any => {
-    return {
-      suggestions: [
-        {
-          label: "reset",
-          kind: 27,
-          documentation: "Reset default padding, margin and box-sizing",
-          insertText: `* {
-\tbox-sizing: border-box;
-\tmargin:0;
-\tpadding:0;
+function registerSuggestions(language: string, suggestions: Object) {
+  languages.registerCompletionItemProvider(language, {
+    provideCompletionItems: (): any => {
+      return suggestions;
+    },
+  });
 }
 
-html, body {
-\twidth: 100%;
-\theight: 100%;
-}`,
-        },
-      ],
-    };
-  },
-});
+registerSuggestions("html", htmlSuggestions);
+registerSuggestions("css", CSSSuggestions);
+registerSuggestions("javascript", JSSuggestions);

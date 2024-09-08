@@ -8,6 +8,9 @@ export default {
         secondary: "#1e1e1e",
       },
     },
+    borderColor: {
+      DEFAULT: '#404040'
+    }
   },
   plugins: [],
 };

@@ -4,6 +4,8 @@ import { createFile } from "../functions";
 export const showInput = ref(false);
 export const filename = ref("");
 
+export const openAside = ref(true);
+
 export function createNewFile() {
   createFile(filename.value);
   filename.value = "";

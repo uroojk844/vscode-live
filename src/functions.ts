@@ -26,9 +26,15 @@ export const currentFile = computed(
 export const path = ref("");
 
 export function refreshFrame() {
-  (document.querySelector("iframe") as HTMLIFrameElement).src = (
-    document.querySelector("iframe") as HTMLIFrameElement
-  ).src;
+  try {
+    (
+      document.querySelector("iframe") as HTMLIFrameElement
+    ).contentWindow?.location.reload();
+  } catch (e) {
+    (document.querySelector("iframe") as HTMLIFrameElement).src = (
+      document.querySelector("iframe") as HTMLIFrameElement
+    ).src;
+  }
 }
 
 export function getFileType(filename: string) {
