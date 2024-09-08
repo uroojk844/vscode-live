@@ -1,5 +1,4 @@
 import { ref, watch } from "vue";
-import { deleteFile } from "../functions";
 
 export const showModel = ref(false);
 export const modelAction = ref<boolean | null>(null);
@@ -12,7 +11,9 @@ export function openModel(filename: string) {
 
 watch(modelAction, () => {
   if (modelAction.value == true && file.value != "") {
-    deleteFile(file.value);
+    import("./files.store").then((f) => {
+      f.useFileStore().deleteFile(file.value);
+    });
   } else if (modelAction.value == false) {
     file.value = "";
   }

@@ -1,21 +1,28 @@
 <template>
     <ul class="tabs">
-        <li v-for="(tab, index) in tabs" :key="index" class="flex items-center gap-2"
-            :class="{ 'active': activeTab == index }" @click="activeTab = index">
+        <li v-for="tab in getTabs" :key="tab.editorId" class="flex items-center gap-2"
+            :class="{ 'active': getActiveTab == tab.filename }" @click.stop="fileStore.setActiveTab(tab.filename)">
             <IconFile :icon="LanguagesIcon[tab.lang]" :name="tab.filename" />
-            <div v-if="tab.lang=='html'" @click="hardReload">
+            <div v-if="tab.lang == 'html'" @click.stop="hardReload">
                 <Icon icon="material-symbols:refresh-rounded" class="hover:text-blue-400" />
             </div>
-            <Icon icon="material-symbols:close-rounded" class="hover:text-red-500" />
+            <div @click.stop="fileStore.closeTab(tab)">
+                <Icon icon="material-symbols:close-rounded" class="hover:text-red-500" />
+            </div>
         </li>
     </ul>
 </template>
 
 <script setup lang="ts">
-import { activeTab, tabs } from '../functions';
 import { LanguagesIcon } from '../store/editor.store';
 import Icon from './Icon.vue';
 import IconFile from './IconFile.vue';
+import { useFileStore } from '../store/files.store';
+import { storeToRefs } from 'pinia';
+
+const fileStore = useFileStore();
+
+const { getActiveTab, getTabs } = storeToRefs(fileStore);
 
 function hardReload() {
     (document.querySelector('iframe') as HTMLIFrameElement).src = (document.querySelector('iframe') as HTMLIFrameElement).src;
@@ -25,6 +32,11 @@ function hardReload() {
 <style scoped>
 .tabs {
     display: flex;
+    overflow: auto;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 
     li {
         flex: 0 0 170px;

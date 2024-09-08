@@ -18,6 +18,12 @@ import TabBar from './Components/TabBar.vue';
 import { path } from './functions';
 import { Icon } from '@iconify/vue/dist/iconify.js';
 import { openAside } from './store/editor.store';
+import { onMounted } from 'vue';
+import { useFileStore } from './store/files.store';
+
+onMounted(()=> {
+  useFileStore().init();
+})
 
 </script>
 

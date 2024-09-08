@@ -6,7 +6,6 @@ import JSONWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
 import TSWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 import { htmlSuggestions } from "./suggestions/HTML";
 import { CSSSuggestions } from "./suggestions/css";
-import { JSSuggestions } from "./suggestions/JS";
 
 self.MonacoEnvironment = {
   getWorker: function (_, label) {
@@ -45,7 +44,7 @@ export function createEditor(element: HTMLElement, lang: string) {
 
 function registerSuggestions(language: string, suggestions: Object) {
   languages.registerCompletionItemProvider(language, {
-    provideCompletionItems: (): any => {
+    provideCompletionItems: function (): any {
       return suggestions;
     },
   });
@@ -53,4 +52,3 @@ function registerSuggestions(language: string, suggestions: Object) {
 
 registerSuggestions("html", htmlSuggestions);
 registerSuggestions("css", CSSSuggestions);
-registerSuggestions("javascript", JSSuggestions);

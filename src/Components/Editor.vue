@@ -12,12 +12,16 @@ div {
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import "../config";
 import { Languages } from '../types';
 import { createEditor } from '../config';
-import { currentFile, getFileType, path, refreshFrame, uid } from '../functions';
+import { getFileType, path, refreshFrame, uid } from '../functions';
 import { useDebounceFn } from '@vueuse/core';
 import { editor } from 'monaco-editor';
+import { useFileStore } from '../store/files.store';
+import { storeToRefs } from 'pinia';
+
+const fileStore = useFileStore();
+const { getActiveTab } = storeToRefs(fileStore);
 
 const props = withDefaults(defineProps<{ id: number, file: string, isActive: boolean, lang: Languages }>(), {
     isActive: false,
@@ -39,7 +43,7 @@ const debouncedFn = useDebounceFn(() => {
         method: "post",
         body: JSON.stringify({
             "uid": uid.value,
-            "filename": currentFile.value,
+            "filename": getActiveTab.value,
             "text": codeEditor.getValue(),
         }),
         headers: {
@@ -49,6 +53,7 @@ const debouncedFn = useDebounceFn(() => {
 }, 500)
 
 onMounted(async () => {
+
     codeEditor = createEditor(document.getElementById('editor' + props.id) as HTMLElement, props.lang);
 
     // fetching file content from server on page load
@@ -57,8 +62,8 @@ onMounted(async () => {
     codeEditor.setValue(text.success);
 
     codeEditor.onDidFocusEditorText(() => {
-        if (getFileType(currentFile.value) == 'html') {
-            path.value = `${URL}code/${uid.value}/${currentFile.value}`;
+        if (getFileType(getActiveTab.value) == 'html') {
+            path.value = `${URL}code/${uid.value}/${getActiveTab.value}`;
         }
         refreshFrame();
     })
