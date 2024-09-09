@@ -63,7 +63,7 @@ onMounted(async () => {
 
     codeEditor.onDidFocusEditorText(() => {
         if (getFileType(getActiveTab.value) == 'html') {
-            path.value = `${URL}code/${uid.value}/${getActiveTab.value}`;
+            path.value = `${URL}code/${uid.value}/${getActiveTab.value}?${Math.floor(Math.random() * 1000000000)}`;
         }
         refreshFrame();
     })

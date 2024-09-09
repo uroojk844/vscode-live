@@ -14,7 +14,9 @@ export function refreshFrame() {
     ).contentWindow?.location.reload();
   } catch (e) {
     (document.querySelector("iframe") as HTMLIFrameElement).src =
-      (document.querySelector("iframe") as HTMLIFrameElement).src +
+      (document.querySelector("iframe") as HTMLIFrameElement).src.split(
+        "?"
+      )[0] +
       "?" +
       Math.floor(Math.random() * 1000000000);
   }
